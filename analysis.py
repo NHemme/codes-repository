@@ -85,39 +85,42 @@ branchtrack = treeReader.UseBranch("Track")
 
 # Book histograms
 
+Nbins = 250
+hist1Jet1PT = ROOT.TH1F("jet1_pt", "Lead jet p_{T} with R=%.1f;p_{T} [GeV];N_{events}"%(R), Nbins, 0, 2500.0)
+hist1Jet2PT = ROOT.TH1F("jet2_pt", "Sub jet p_{T} with R=%.1f;p_{T} [GeV];N_{events}"%(R), Nbins, 0, 2500.0)
+
 Nbins = 150
-hist1Jet1PT = ROOT.TH1F("jet1_pt", "Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
-hist1Jet2PT = ROOT.TH1F("jet2_pt", "Sub jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
-histMET = ROOT.TH1F("jet_met", "Missing transverse energy;MET GeV;A.U.", Nbins, .0, 3000.0)
-hist1JetmJJ = ROOT.TH1F("jet_mJJ", " Invariant mass m_{JJ} with R=%.1f;m_{JJ} GeV;A.U."%(R), Nbins, 0.0, 3500.0)
+histMET = ROOT.TH1F("jet_met", "Missing transverse energy;MET [GeV];N_{events}", Nbins, .0, 3000.0)
+hist1JetmJJ = ROOT.TH1F("jet_mJJ", " Invariant mass m_{JJ} with R=%.1f;m_{JJ} [GeV];N_{events}"%(R), Nbins, 0.0, 3500.0)
 
 Nbins = 40
-hist1Jet1Ntrk = ROOT.TH1F("jet1_ntrk", "Lead jet N_{trk} with R=%.1f;N_{trk};A.U."%(R), Nbins, .0, 170.0)
-hist1Jet2Ntrk = ROOT.TH1F("jet2_ntrk", "Sub jet N_{trk} with R=%.1f;N_{trk};A.U."%(R), Nbins, .0, 170.0)
+hist1Jet1Ntrk = ROOT.TH1F("jet1_ntrk", "Lead jet N_{trk} with R=%.1f;N_{trk};N_{events}"%(R), Nbins, .0, 170.0)
+hist1Jet2Ntrk = ROOT.TH1F("jet2_ntrk", "Sub jet N_{trk} with R=%.1f;N_{trk};N_{events}"%(R), Nbins, .0, 170.0)
 
 Nbins = 150
-hmt = ROOT.TH1F("jet_met_mt" , "Transverse mass of jet + MET" , Nbins, 0.0 , 3000.0)
+hmt = ROOT.TH1F("jet_met_mt" , "Transverse mass of jet + MET;m_{T} [GeV];N_{events}" , Nbins, 0.0 , 3500.0)
 
 Nbins = 50
-hdphi1 = ROOT.TH1F("dPhi1", "dPhi_jet1_met", Nbins, 0.0, 10.0)
-hdphi2 = ROOT.TH1F("dPhi2", "dPhi_jet2_met", Nbins, 0.0, 10.0)
+hdphi1 = ROOT.TH1F("dPhi1", "\Delta\Phi_{Lead,MET};\Delta\Phi [rad];N_{events}", Nbins, -4.0, 4)
+hdphi2 = ROOT.TH1F("dPhi2", "\Delta\Phi_{Sub,MET};\Delta\Phi [rad];N_{events}", Nbins, -4.0, 4)
 
 Nbins = 100
-hrt = ROOT.TH1F("jet_met_rt" , "Transverse ratio of jet + MET" , Nbins, 0.0 , 1.0)
+hrt = ROOT.TH1F("jet_met_rt" , "Transverse ratio of MET to jet+MET;Ratio;N_{events}" , Nbins, 0.0 , 1.0)
+
+Nbins = 250
+hist2Jet1PT = ROOT.TH1F("jet1_pt_softdrop", "Lead jet p_{T} with R=%.1f;p_{T} [GeV];N_{events}"%(R), Nbins, 0.0, 2500.0)
+hist2Jet2PT = ROOT.TH1F("jet2_pt_softdrop", "Sub jet p_{T} with R=%.1f;p_{T} [GeV];N_{events}"%(R), Nbins, 0.0, 2500.0)
+hist2JetmJJ = ROOT.TH1F("jet_mJJ_softdrop", " Invariant mass m_{JJ} with R=%.1f;m_{JJ} [GeV];N_{events}"%(R), Nbins, 0.0, 3500.0)
+
+hist3Jet1PT = ROOT.TH1F("jet1_pt_trimmed", "Lead jet p_{T} with R=%.1f;p_{T} [GeV];N_{events}"%(R), Nbins, 0.0, 2500.0)
+hist3Jet2PT = ROOT.TH1F("jet2_pt_trimmed", "Sub jet p_{T} with R=%.1f;p_{T} [GeV];N_{events}"%(R), Nbins, 0.0, 2500.0)
+hist3JetmJJ = ROOT.TH1F("jet_mJJ_trimmed", " Invariant mass m_{JJ} with R=%.1f;m_{JJ} [GeV];N_{events}"%(R), Nbins, 0.0, 3500.0)
 
 Nbins = 150
-hist2Jet1PT = ROOT.TH1F("jet1_pt_softdrop", "Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
-hist2Jet2PT = ROOT.TH1F("jet2_pt_softdrop", "Sub jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
-hist2JetmJJ = ROOT.TH1F("jet_mJJ_softdrop", " Invariant mass m_{JJ} with R=%.1f;m_{JJ} GeV;A.U."%(R), Nbins, 0.0, 3500.0)
-
-hist3Jet1PT = ROOT.TH1F("jet1_pt_trimmed", "Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
-hist3Jet2PT = ROOT.TH1F("jet2_pt_trimmed", "Sub jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
-hist3JetmJJ = ROOT.TH1F("jet_mJJ_trimmed", " Invariant mass m_{JJ} with R=%.1f;m_{JJ} GeV;A.U."%(R), Nbins, 0.0, 3500.0)
-
 histtrackpt = ROOT.TH2F("track_pt", "track PT vs Ntrk1", 20,0.0,100.0 , 40,0.0,160.0)
 
 Nbins = 50
-histdelEta = ROOT.TH1F("delta_eta", "delta_eta_jet1_and_jet2", 50,0.0,10.0)
+histdelEta = ROOT.TH1F("delta_eta", "\Delta\eta_{Lead,Sub};\Delta\eta;N_{events}", Nbins,-5.0,5.0)
 
 
 # Loop over all events
@@ -231,14 +234,16 @@ for entry in range(0, numberOfEntries):
             hdphi1.Fill(dPhi1)
             hdphi2.Fill(dPhi2)
             hrt.Fill(rt)
-            hist2Jet1PT.Fill(jet1_pt_softdrop)
-            hist2Jet2PT.Fill(jet2_pt_softdrop)
-            hist2JetmJJ.Fill(invmass_softdrop)
-            hist3Jet1PT.Fill(jet1_pt_trimmed)
-            hist3Jet2PT.Fill(jet2_pt_trimmed)
-            hist3JetmJJ.Fill(invmass_trimmed)
             histdelEta.Fill(delEta)
             histtrackpt.Fill(averagept,jet1.NCharged)
+            if jet1_pt_softdrop > pT_min_jet1 and jet2_pt_softdrop > pT_min_jet2:
+                hist2Jet1PT.Fill(jet1_pt_softdrop)
+                hist2Jet2PT.Fill(jet2_pt_softdrop)
+                hist2JetmJJ.Fill(invmass_softdrop)
+            if jet1_pt_trimmed > pT_min_jet1 and jet2_pt_trimmed > pT_min_jet2:
+                hist3Jet1PT.Fill(jet1_pt_trimmed)
+                hist3Jet2PT.Fill(jet2_pt_trimmed)
+                hist3JetmJJ.Fill(invmass_trimmed)
 
 #Printing number of accepted events
 integral=hmt.Integral(0,-1)
@@ -263,23 +268,23 @@ if hist3Jet2PT.GetSumw2N()==0: hist3Jet2PT.Sumw2(True)
 if hist3JetmJJ.GetSumw2N()==0: hist3JetmJJ.Sumw2(True)
 if histdelEta.GetSumw2N()==0: histdelEta.Sumw2(True)
 
-hist1Jet1PT.Scale(1./hist1Jet1PT.Integral())
-hist1Jet2PT.Scale(1./hist1Jet2PT.Integral())
-hist1JetmJJ.Scale(1./hist1JetmJJ.Integral())
-hist1Jet1Ntrk.Scale(1./hist1Jet1Ntrk.Integral())
-hist1Jet2Ntrk.Scale(1./hist1Jet2Ntrk.Integral())
-histMET.Scale(1./histMET.Integral())
-hmt.Scale(1./hmt.Integral())
-hdphi1.Scale(1./hdphi1.Integral())
-hdphi2.Scale(1./hdphi2.Integral())
-hrt.Scale(1./hrt.Integral())
-hist2Jet1PT.Scale(1./hist2Jet1PT.Integral())
-hist2Jet2PT.Scale(1./hist2Jet2PT.Integral())
-hist2JetmJJ.Scale(1./hist2JetmJJ.Integral())
-hist3Jet1PT.Scale(1./hist3Jet1PT.Integral())
-hist3Jet2PT.Scale(1./hist3Jet2PT.Integral())
-hist3JetmJJ.Scale(1./hist3JetmJJ.Integral())
-histdelEta.Scale(1./histdelEta.Integral())
+#hist1Jet1PT.Scale(1./hist1Jet1PT.Integral())
+#hist1Jet2PT.Scale(1./hist1Jet2PT.Integral())
+#hist1JetmJJ.Scale(1./hist1JetmJJ.Integral())
+#hist1Jet1Ntrk.Scale(1./hist1Jet1Ntrk.Integral())
+#hist1Jet2Ntrk.Scale(1./hist1Jet2Ntrk.Integral())
+#histMET.Scale(1./histMET.Integral())
+#hmt.Scale(1./hmt.Integral())
+#hdphi1.Scale(1./hdphi1.Integral())
+#hdphi2.Scale(1./hdphi2.Integral())
+#hrt.Scale(1./hrt.Integral())
+#hist2Jet1PT.Scale(1./hist2Jet1PT.Integral())
+#hist2Jet2PT.Scale(1./hist2Jet2PT.Integral())
+#hist2JetmJJ.Scale(1./hist2JetmJJ.Integral())
+#hist3Jet1PT.Scale(1./hist3Jet1PT.Integral())
+#hist3Jet2PT.Scale(1./hist3Jet2PT.Integral())
+#hist3JetmJJ.Scale(1./hist3JetmJJ.Integral())
+#histdelEta.Scale(1./histdelEta.Integral())
 
 #Creating a list and saving the histograms to the list.
 
