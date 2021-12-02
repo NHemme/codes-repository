@@ -2,7 +2,7 @@ To make plots of a single model use command:
 ```
 python /path/plotsinglemodel.py /path/output.root
 ```
-and optionally add the following arguments: histogram_number(integer) groomed_plots(boolean) scale_au(boolean) var_legend(boolean)
+and optionally add the following arguments:
 ```
 histogram_number(integer) groomed_plots(boolean) scale_au(boolean) var_legend(boolean)
 ```
