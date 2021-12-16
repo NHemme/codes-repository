@@ -72,6 +72,7 @@ chain.Add(inputFile)
 # Create object of class ExRootTreeReader
 treeReader = ROOT.ExRootTreeReader(chain)
 numberOfEntries = treeReader.GetEntries()
+print("The number of events are %i"%numberOfEntries)
 
 # Get pointer to branches used in this analysis
 # R-jet branches : 04, 08, 10, 12, 14

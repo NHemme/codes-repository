@@ -87,7 +87,7 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     max_x = h0.GetXaxis().GetXmax()
     min_x = h0.GetXaxis().GetXmin()
     h0.GetXaxis().SetRangeUser(min_x, max_x)
-    max_y = h0.GetBinContent(h0.GetMaximumBin())*1.1
+    max_y = h0.GetBinConten t(h0.GetMaximumBin())*1.1
     h0.GetYaxis().SetRangeUser(0, max_y)
     #set margins on canvas
     c.SetRightMargin(0.09)
@@ -100,21 +100,21 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     if var_legend == True:
         legendp = GetLegendPlacement(legend_positions[histnumber])
     else: 
-        legendp = GetPosition('r')
+        legendp = GetLegendPlacement('r')
     a,b = legendp
     latex.SetTextSize(0.04)
     legend = ROOT.TLegend (a,0.64 ,b,0.74)
     latex.DrawText(a+0.01, 0.85 , "Dark Shower Sample")
     latex.SetTextSize(0.03)
-    latex.DrawLatex(a+0.01, 0.8 , "#bf{Higgs events at #sqrt{s}=13 TeV}")
-    latex.DrawLatex(a+0.01, 0.76 , "#bf{m_{H}=2 TeV, N_{c}=5, N_{f}=2}")
+    latex.DrawLatex(a+0.01, 0.8 , "#bf{pp events at #sqrt{s}=13 TeV}")
+    latex.DrawLatex(a+0.01, 0.76 , "#bf{m_{Z'}=800 GeV, N_{c}=2, N_{f}=2}")
     legend.AddEntry (histoname, histotitle)
     legend.SetLineWidth (0)
     legend.Draw("same")
     
     # Print statistics
     stat_string = GetStatistics(h0,histotitle)
-    #print(stat_string)
+    print(stat_string)
            
     # Draws groomed histograms in same plot if groomed_plots=True and the groomed histograms exist
     if groomed_plots == True:
@@ -129,11 +129,12 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     c.Print(plot_title)
     
 
-if histnumber >= 0 and histnumber <= 17:
+if histnumber >= 0 and histnumber <= 28:
     MakeSinglePlot(infile, histnumber, groomed_plots = False, scale_au = True, var_legend = True)
 else:
-    for hist in range(0,18):
-        if hist == 16:
-            continue
-        else:
-            MakeSinglePlot(infile, histnumber = hist, groomed_plots = False, scale_au = True, var_legend = True)
+    for hist in range(0,29):
+        #if hist == 23:
+        #    continue
+        #else:
+        print(hist)
+        MakeSinglePlot(infile, histnumber = hist, groomed_plots = False, scale_au = True, var_legend = False)
