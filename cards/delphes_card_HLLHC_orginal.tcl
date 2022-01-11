@@ -830,6 +830,10 @@ module PdgCodeFilter NeutrinoFilter {
   add PdgCode {-12}
   add PdgCode {-14}
   add PdgCode {-16}
+  add PdgCode {4900111} 
+  add PdgCode {4900211} 
+  add PdgCode {4900113} 
+  add PdgCode {4900213} 
 
 }
 

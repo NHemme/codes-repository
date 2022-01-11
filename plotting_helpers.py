@@ -41,7 +41,8 @@ def GetStatistics(histogram,histotitle):
     else:
         index = x_unit.find("[")
         x_unit = x_unit[index+1:-1]
-    stat_string = """Some statistics for %s: 
+    stat_string = """
+    Some statistics for %s: 
     There are %i events in the histogram. They are binned into %i bins. 
     The mean is %0.2f %s and the standard deviation is %0.2f %s. 
     Half of the events are contained between %0.2f and %0.2f %s.
@@ -89,5 +90,3 @@ def GetGroomedPlots(rootfile, canvas, histoname, n_bins,legend):
     print(GetStatistics(h1,h1_name))
     print(GetStatistics(h2,h2_name))
     
-    
-
