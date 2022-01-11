@@ -14,6 +14,7 @@ Authors and contacts:
 * Guillaume Albouy: guillaume.albouy@etu.grenoble-univ-alpes.fr
 * Akanksha Singh: akki153209@gmail.com
 * Harikrishnan Nair: hunair1996@gmail.com
+* Nicoline Hemme: nicolinehemme@gmail.com
 
 The code needs ```Delphes``` installed and linked such that delphes library can be invoked. 
 Delphes can be found at
