@@ -4,8 +4,6 @@
 # In[201]:
 
 
-# contact: Suchita Kulkarni
-#suchita.kulkarni@cern.ch; suchita.kulkarni@gmail.com
 #!/usr/bin/env python
 import os, sys, shutil
 from numpy import *
@@ -14,6 +12,7 @@ from scipy.interpolate import interp1d
 import ROOT
 #%run plotting_helpers.ipynb
 from plotting_helpers import *
+import ctypes
 
 
 if len(sys.argv) < 2:
@@ -40,11 +39,13 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     f0 = ROOT.TFile(rootfile1,"READ")
     #f0.ls()
     
-    # Get the histogram, you can rebin the histogram with the commented out rebin option
+    # Get the histogram
     h0=f0.Get(histoname)
     n_bins = h0.GetNbinsX()
-    divider = 25 #larger divider gives more bins
-    while n_bins%divider != 0 :
+    divider = 20 #larger divider gives more bins
+    #print('Number of bins %d'%(n_bins))
+    while n_bins%divider != 0 or divider%2 != 0:
+        #print('divider=%d and n_bins//divider=%d and divider//2=%d'%(divider, n_bins%divider, divider%2))
         divider += 1
     if divider == n_bins:
         divider = divider/2
@@ -85,9 +86,9 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     h0.GetYaxis().SetTitleOffset(1.4)
     #set axis ranges
     max_x = h0.GetXaxis().GetXmax()
-    min_x = h0.GetXaxis().GetXmin()
+    min_x = min(h0.GetXaxis().GetXmin(),0)
     h0.GetXaxis().SetRangeUser(min_x, max_x)
-    max_y = h0.GetBinConten t(h0.GetMaximumBin())*1.1
+    max_y = h0.GetBinContent(h0.GetMaximumBin())*1.1
     h0.GetYaxis().SetRangeUser(0, max_y)
     #set margins on canvas
     c.SetRightMargin(0.09)
@@ -100,7 +101,7 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     if var_legend == True:
         legendp = GetLegendPlacement(legend_positions[histnumber])
     else: 
-        legendp = GetLegendPlacement('r')
+        legendp = GetLegendPlacement('l')
     a,b = legendp
     latex.SetTextSize(0.04)
     legend = ROOT.TLegend (a,0.64 ,b,0.74)
@@ -129,12 +130,12 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     c.Print(plot_title)
     
 
-if histnumber >= 0 and histnumber <= 28:
+if histnumber >= 0 and histnumber <= 29:
     MakeSinglePlot(infile, histnumber, groomed_plots = False, scale_au = True, var_legend = True)
 else:
-    for hist in range(0,29):
+    for hist in range(0,30):
         #if hist == 23:
         #    continue
         #else:
-        print(hist)
+        #print(hist)
         MakeSinglePlot(infile, histnumber = hist, groomed_plots = False, scale_au = True, var_legend = False)

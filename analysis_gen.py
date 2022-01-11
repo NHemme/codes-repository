@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[ ]:
-
-
+# ================================================================================================================
+# Authors and user guide
+# ================================================================================================================
+###################################################################################################################
 # Authors and contacts:
 # Guillaume Albouy: guillaume.albouy@etu.univ-grenoble-alpes.fr
 # Akanksha Singh: akki153209@gmail.com
 # Harikrishnan Nair: hunair1996@gmail.com
+# Nicoline Hemme: nicolinehemme@gmail.com
 
-# This code needs helpers.py and histo_defs.py which are stored in the same folder as this file
-# Following cuts on events are assumed
-# jet1.PT > 500 and np.abs(jet1.Eta) < 2.5 and jet2.PT > 500 and np.abs(jet2.Eta) < 2.5
+# This code needs helpers.py which are stored in the same folder as this file
 # We assume that different branches corresponding to different jet radii are defined in root files
-# In this code jet clustering radius is fixed to 1.4, can be changed at line 52
+# In this code jet clustering radius is fixed to 1.4, can be changed at line 59
 # This code will analyse input sample and create following reconstructed level normalized distributions:
 # 1) pt of leading/subleading jet
 # 2) dijet invarint mass
@@ -24,9 +23,11 @@
 # 7) 2D histo of track pT of leading jet
 # 8) delta eta between leading and subleading jet
 # 9) pt and invariant mass for trimmed and SoftDropped leading/subleading jets
-#
-# command: python /path_of_code/transverse_mass.py /path_of_rootfile/name_of_rootfile.root /path_of_rootfile/output_name.root
+
+# command: python /path_of_code/analysis.py /path_of_rootfile/name_of_rootfile.root /path_of_rootfile/output_name.root
 # Takes the rootfile as input and computes the defined variables and fills the respective histograms.
+###################################################################################################################
+
 
 import sys
 import numpy as np
@@ -52,17 +53,22 @@ try:
 except:
         pass
 
-# Parameters
-############################################
+    
+# ================================================================================================================
+# Define the parameters of selection cuts
+# ================================================================================================================
 # Radius of jets (0.4, 1.0, 1.4) :
 R = 1.4
 # Events selection (pT in GeV)
-pT_min_jet1 = 0
-pT_min_jet2 = 0
+pT_min_jet1 = 250
+pT_min_jet2 = 250
 eta_max = 2.5
 M_PI = 3.14
-############################################
 
+
+# ================================================================================================================
+# Get files from input and create ROOT objects
+# ================================================================================================================
 inputFile = sys.argv[1]
 print("Input file :")
 print(inputFile)
@@ -88,30 +94,39 @@ invpid  = [12, 14, 16, -12, -14, -16, 6000111,-6000111] #Neutrinoes (& anti) and
 piPID = [4900111, 4900211]
 rhoPID = [4900113, 4900213]
 
+
+
+# ================================================================================================================
 # Getting the required branches from Delphes ROOT file.
-
+# ================================================================================================================
+###############################
+# Reconstruction level branches
+###############################
 branchPtcl = treeReader.UseBranch("Particle")
-
 branchJet = treeReader.UseBranch("ParticleFlowJet%s"%R_jet)
 branchMET = treeReader.UseBranch("MissingET")
 branchtrack = treeReader.UseBranch("Track")
 
+###########################
+# Generator level branches
+###########################
 branchGenMET = treeReader.UseBranch("GenMissingET")
 branchGenJet = treeReader.UseBranch("GenJet%s"%R_jet)
 
-# Book histograms
 
-# All generator-level histograms
+# ================================================================================================================
+# Book histograms at generator level
+# ================================================================================================================
 Nbins = 150
-hist1GenJet1PT = ROOT.TH1F("gen_jet1_pt", "Gen Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
-hist1GenJet2PT = ROOT.TH1F("gen_jet2_pt", "Gen sub-Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
+hist1GenJet1PT = ROOT.TH1F("gen_jet1_pt", "Gen Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, pT_min_jet1, 2000.0)
+hist1GenJet2PT = ROOT.TH1F("gen_jet2_pt", "Gen sub-Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, pT_min_jet2, 2000.0)
 histGenJetmJJ = ROOT.TH1F("gen jet_mJJ", "Gen Invariant mass m_{JJ} with R=%.1f"%(R), Nbins, 0.0, 3500.0)
 histGenMET = ROOT.TH1F("gen_met", "Gen Missing transverse energy", Nbins, .0, 1500.0) # to be implemented
 histGenmT = ROOT.TH1F("gen_jet_met_mt" , "Gen transverse mass of jet + MET" , Nbins, 0.0 , 3000.0)
 histGenJetdphi = ROOT.TH1F("gen_jet_dphi", "dphi between Gen jets with R=%.1f"%(R), Nbins, 0.0, 6.0)
 
 Nbins = 50
-#histGenrinv = ROOT.TH1F("gen_rinv", "Gen invisible ratio", Nbins, 0.0, 1.0)
+histGenrinv = ROOT.TH1F("gen_rinv", "Gen invisible ratio", Nbins, 0.0, 1.0)
 histGenratT = ROOT.TH1F("gen_jet_met_rt" , "Gen transverse ratio of jet + MET" , Nbins, 0.0 , 1.0)
 
 #Nbins = 40
@@ -136,10 +151,12 @@ histGendelEta = ROOT.TH1F("gen_delta_eta", "Gen delta_eta_jet1_and_jet2", Nbins,
 #hist3JetmJJ = ROOT.TH1F("jet_mJJ_trimmed", " Invariant mass m_{JJ} with R=%.1f;m_{JJ} GeV;A.U."%(R), Nbins, 0.0, 3500.0)
 
 
-
+# ================================================================================================================
+# Book histograms at reconstruction level
+# ================================================================================================================
 Nbins = 150
-hist1Jet1PT = ROOT.TH1F("jet1_pt", "Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
-hist1Jet2PT = ROOT.TH1F("jet2_pt", "Sub jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, 0.0, 2000.0)
+hist1Jet1PT = ROOT.TH1F("jet1_pt", "Lead jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, pT_min_jet1, 2000.0)
+hist1Jet2PT = ROOT.TH1F("jet2_pt", "Sub jet p_{T} with R=%.1f;p_{T} GeV;A.U."%(R), Nbins, pT_min_jet2, 2000.0)
 histMET = ROOT.TH1F("jet_met", "Missing transverse energy;MET GeV;A.U.", Nbins, .0, 3000.0)
 hist1JetmJJ = ROOT.TH1F("jet_mJJ", "Invariant mass m_{JJ} with R=%.1f;m_{JJ} GeV;A.U."%(R), Nbins, 0.0, 3500.0)
 histmT = ROOT.TH1F("jet_met_mt" , "Transverse mass of jet + MET" , Nbins, 0.0 , 3000.0)
@@ -171,75 +188,90 @@ hist3JetmJJ = ROOT.TH1F("jet_mJJ_trimmed", "Trimmed invariant mass m_{JJ} with R
 #histtrackpt = ROOT.TH2F("track_pt", "track PT vs Ntrk1", 20,0.0,100.0 , 40,0.0,160.0)
 
 
+# ================================================================================================================
+# Perform analysis - loop over all events
+# ================================================================================================================
 
-# Loop over all events
 for entry in range(0, numberOfEntries):
     # Load selected branches with data from specified event
     treeReader.ReadEntry(entry)
     totpx, totpy = 0, 0
     npi, nrho = 0, 0 
-    nstable, ndecayed = 0,0
+    allmesons, stablemesons = 0,0
     for iptcl in range(branchPtcl.GetEntries()):
-        if abs(branchPtcl.At(iptcl).PID) in piPID+rhoPID:
-            #if entry%1000 == 0: print(branchPtcl.At(iptcl).PID, branchPtcl.At(iptcl).Status)
-            if branchPtcl.At(iptcl).Status == 1: 
-                nstable = nstable + 1
-                if abs(branchPtcl.At(iptcl).PID) in piPID: npi = npi + 1
-                if abs(branchPtcl.At(iptcl).PID) in rhoPID: nrho = nrho + 1
-            if branchPtcl.At(iptcl).Status == 61: ndecayed = ndecayed + 1
-        #if iptcl>1300: print(iptcl, branchPtcl.At(iptcl).Status, branchPtcl.At(iptcl).PID)
+        if abs(branchPtcl.At(iptcl).PID) not in piPID+rhoPID:
+            continue
+        if branchPtcl.At(iptcl).Status not in [1,83,84]:
+            print('Unexpected status of dark particle. Status is %d.'%(branchPtcl.At(iptcl).Status))
+        allmesons = allmesons + 1
+        if branchPtcl.At(iptcl).Status in [83,84]:
+            if branchPtcl.At(iptcl).PID in piPID:
+                print('Unstable pion')
+            if branchPtcl.At(iptcl).PID in rhoPID:
+                print('Unstable rho')
+                print(branchPtcl.At(iptcl).PID)
+        #if branchPtcl.At(iptcl).Status in [83,84]:
+        #    daut = branchPtcl.At(iptcl).D1
+        #    print(branchPtcl.At(daut).Status)
+        if branchPtcl.At(iptcl).Status == 1:
+            stablemesons = stablemesons + 1
+            if abs(branchPtcl.At(iptcl).PID) in piPID: npi = npi + 1
+            if abs(branchPtcl.At(iptcl).PID) in rhoPID: nrho = nrho + 1
         #totpx = branchPtcl.At(iptcl).Px + totpx
-        #totpy = branchPtcl.At(iptcl).Py + totpy
-    #histGenMET.Fill(np.sqrt(totpx**2 + totpy**2))
-    #if (ndecayed!=0): rinv = nstable/ndecayed
-    #else: rinv = 1
+        #totpy = branchPtcl.At(iptcl).Py + totpy     
     #if entry%1000 == 0:
-    #    print(rinv)
+    #    print(allmesons, stablemesons, stablemesons/allmesons)
+    if allmesons != 0:
+        rinv = stablemesons/allmesons
+        histGenrinv.Fill(rinv)
+    
+    #histGenMET.Fill(np.sqrt(totpx**2 + totpy**2))
     histGenPions.Fill(npi)
     histGenRhos.Fill(nrho)
-    #histGenrinv.Fill(rinv)
         
-
-    # Gen level plots, no cuts
+    #######################
+    # Generator level plots
+    #######################
     if branchGenJet.GetEntries() > 1: 
         # Take the two leading jets
         genjet1 = branchGenJet.At(0)
         genjet2 = branchGenJet.At(1)
         
-        genjet1vec = ROOT.TLorentzVector()
-        genjet2vec = ROOT.TLorentzVector()
-        genjet1vec = GetJetVector(genjet1.PT , genjet1.Eta , genjet1.Phi , genjet1.Mass)
-        genjet2vec = GetJetVector(genjet2.PT , genjet2.Eta , genjet2.Phi , genjet2.Mass)
-        genmet = branchMET.At(0)
-        genm = genmet.MET
-        genMETPhi = genmet.Phi
-        genMETx = genm* np.cos(genMETPhi)
-        genMETy = genm* np.sin(genMETPhi)
-        genvecmet = ROOT.TLorentzVector()
-        genvecmet.SetPxPyPzE(genMETx , genMETy , 0 , genm)
-        
-        genmt = (genjet1vec + genjet2vec + genvecmet).Mt()
-        gendphi1 = GetdPhi(genjet1.Phi, genmet.Phi)
-        gendphi2 = GetdPhi(genjet2.Phi , genmet.Phi)
-        gendelEta = GetdEta(genjet1.Eta , genjet2.Eta)
-        if (genmt!=0): genrt = genm/genmt
-        
-        
-        hist1GenJet1PT.Fill(branchGenJet.At(0).PT)
-        hist1GenJet2PT.Fill(branchGenJet.At(1).PT)
-        histGenMET.Fill(branchGenMET.At(0).MET)
-        histGenJetmJJ.Fill((genjet1vec+genjet2vec).M())
-        histGenJetdphi.Fill(GetdPhi(branchGenJet.At(0).Phi,branchGenJet.At(1).Phi))
-        histGenmT.Fill(genmt)
-        histGenratT.Fill(genrt)
-        histGendphi1.Fill(gendphi1)
-        histGendphi2.Fill(gendphi2)
-        histGendelEta.Fill(gendelEta)
+        if genjet1.PT > pT_min_jet1 and np.abs(genjet1.Eta) < eta_max and genjet2.PT > pT_min_jet2 and np.abs(genjet2.Eta) < eta_max :
+            genjet1vec = ROOT.TLorentzVector()
+            genjet2vec = ROOT.TLorentzVector()
+            genjet1vec = GetJetVector(genjet1.PT , genjet1.Eta , genjet1.Phi , genjet1.Mass)
+            genjet2vec = GetJetVector(genjet2.PT , genjet2.Eta , genjet2.Phi , genjet2.Mass)
+            genmet = branchMET.At(0)
+            genm = genmet.MET
+            genMETPhi = genmet.Phi
+            genMETx = genm* np.cos(genMETPhi)
+            genMETy = genm* np.sin(genMETPhi)
+            genvecmet = ROOT.TLorentzVector()
+            genvecmet.SetPxPyPzE(genMETx , genMETy , 0 , genm)
+
+            genmt = (genjet1vec + genjet2vec + genvecmet).Mt()
+            gendphi1 = GetdPhi(genjet1.Phi, genmet.Phi)
+            gendphi2 = GetdPhi(genjet2.Phi , genmet.Phi)
+            gendelEta = GetdEta(genjet1.Eta , genjet2.Eta)
+            if (genmt!=0): genrt = genm/genmt
 
 
+            hist1GenJet1PT.Fill(branchGenJet.At(0).PT)
+            hist1GenJet2PT.Fill(branchGenJet.At(1).PT)
+            histGenMET.Fill(branchGenMET.At(0).MET)
+            histGenJetmJJ.Fill((genjet1vec+genjet2vec).M())
+            histGenJetdphi.Fill(GetdPhi(branchGenJet.At(0).Phi,branchGenJet.At(1).Phi))
+            histGenmT.Fill(genmt)
+            histGenratT.Fill(genrt)
+            histGendphi1.Fill(gendphi1)
+            histGendphi2.Fill(gendphi2)
+            histGendelEta.Fill(gendelEta)
 
-    # reco level plots
-    # If event contains at least 2 jets
+
+    ############################
+    # Reconstruction level plots
+    ############################
     if branchJet.GetEntries() > 1:
         # Take the two leading jets
         jet1 = branchJet.At(0)
@@ -356,11 +388,12 @@ for entry in range(0, numberOfEntries):
                 hist3Jet2PT.Fill(jet2_pt_trimmed)
                 hist3JetmJJ.Fill(invmass_trimmed)
 
-#Printing number of accepted events
-integral=histmT.Integral(0,-1)
-#print("integral=",integral)
 
-#Normalizing the histogram
+
+# ================================================================================================================
+# Normalising histograms
+# ================================================================================================================
+if histGenrinv.GetSumw2N()==0: histGenrinv.Sumw2(True)
 if hist1Jet1PT.GetSumw2N()==0: hist1Jet1PT.Sumw2(True)
 if hist1Jet2PT.GetSumw2N()==0: hist1Jet2PT.Sumw2(True)
 if hist1JetmJJ.GetSumw2N()==0: hist1JetmJJ.Sumw2(True)
@@ -379,33 +412,17 @@ if hist3Jet2PT.GetSumw2N()==0: hist3Jet2PT.Sumw2(True)
 if hist3JetmJJ.GetSumw2N()==0: hist3JetmJJ.Sumw2(True)
 if histdelEta.GetSumw2N()==0: histdelEta.Sumw2(True)
 
-'''hist1Jet1PT.Scale(1./hist1Jet1PT.Integral())
-hist1Jet2PT.Scale(1./hist1Jet2PT.Integral())
-hist1JetmJJ.Scale(1./hist1JetmJJ.Integral())
-hist1Jet1Ntrk.Scale(1./hist1Jet1Ntrk.Integral())
-hist1Jet2Ntrk.Scale(1./hist1Jet2Ntrk.Integral())
-histMET.Scale(1./histMET.Integral())
-histmT.Scale(1./histmT.Integral())
-histdphi1.Scale(1./histdphi1.Integral())
-histdphi2.Scale(1./histdphi2.Integral())
-histratT.Scale(1./histratT.Integral())
-hist2Jet1PT.Scale(1./hist2Jet1PT.Integral())
-hist2Jet2PT.Scale(1./hist2Jet2PT.Integral())
-hist2JetmJJ.Scale(1./hist2JetmJJ.Integral())
-hist3Jet1PT.Scale(1./hist3Jet1PT.Integral())
-hist3Jet2PT.Scale(1./hist3Jet2PT.Integral())
-hist3JetmJJ.Scale(1./hist3JetmJJ.Integral())
-histdelEta.Scale(1./histdelEta.Integral())'''
 
-#Creating a list and saving the histograms to the list.
-
+# ================================================================================================================
+# Creating a list and saving the histograms to the list
+# ================================================================================================================
 histlist = ROOT.TList()
 histlist.Add(hist1GenJet1PT)
 histlist.Add(hist1GenJet2PT)
 histlist.Add(histGenMET)
 histlist.Add(histGenPions)
 histlist.Add(histGenRhos)
-#histlist.Add(histGenrinv)
+histlist.Add(histGenrinv)
 histlist.Add(histGenJetmJJ)
 histlist.Add(histGenJetdphi)
 histlist.Add(histGendphi1)
@@ -433,6 +450,9 @@ histlist.Add(hist3JetmJJ)
 histlist.Add(histdelEta)
 
 
+# ================================================================================================================
+# Final steps
+# ================================================================================================================
 #outputFile = inputFile[:-5] + "_combined_R14.root"
 rootFile = ROOT.TFile(outputFile, "RECREATE")
 histlist.Write()
