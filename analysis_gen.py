@@ -112,6 +112,7 @@ branchtrack = treeReader.UseBranch("Track")
 ###########################
 branchGenMET = treeReader.UseBranch("GenMissingET")
 branchGenJet = treeReader.UseBranch("GenJet%s"%R_jet)
+branchGenTrack = treeReader.UseBranch("GenTrack")
 
 
 # ================================================================================================================
@@ -198,6 +199,7 @@ for entry in range(0, numberOfEntries):
     totpx, totpy = 0, 0
     npi, nrho = 0, 0 
     allmesons, stablemesons = 0,0
+    npi_unstable, nrho_unstable = 0,0
     for iptcl in range(branchPtcl.GetEntries()):
         if abs(branchPtcl.At(iptcl).PID) not in piPID+rhoPID:
             continue
@@ -206,10 +208,12 @@ for entry in range(0, numberOfEntries):
         allmesons = allmesons + 1
         if branchPtcl.At(iptcl).Status in [83,84]:
             if branchPtcl.At(iptcl).PID in piPID:
-                print('Unstable pion')
+                #print('Unstable pion')
+                npi_unstable = npi_unstable + 1
             if branchPtcl.At(iptcl).PID in rhoPID:
-                print('Unstable rho')
-                print(branchPtcl.At(iptcl).PID)
+                #print('Unstable rho')
+                #print(branchPtcl.At(iptcl).PID)
+                nrho_unstable = nrho_unstable + 1
         #if branchPtcl.At(iptcl).Status in [83,84]:
         #    daut = branchPtcl.At(iptcl).D1
         #    print(branchPtcl.At(daut).Status)
@@ -219,7 +223,8 @@ for entry in range(0, numberOfEntries):
             if abs(branchPtcl.At(iptcl).PID) in rhoPID: nrho = nrho + 1
         #totpx = branchPtcl.At(iptcl).Px + totpx
         #totpy = branchPtcl.At(iptcl).Py + totpy     
-    #if entry%1000 == 0:
+    if entry%1000 == 0:
+        print('Number of unstable pions: %i. Number of unstable rhos: %i'%(npi_unstable,nrho_unstable))
     #    print(allmesons, stablemesons, stablemesons/allmesons)
     if allmesons != 0:
         rinv = stablemesons/allmesons

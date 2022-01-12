@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[201]:
-
 
 #!/usr/bin/env python
 import os, sys, shutil
@@ -10,42 +8,43 @@ from numpy import *
 from pylab import *
 from scipy.interpolate import interp1d
 import ROOT
-#%run plotting_helpers.ipynb
 from plotting_helpers import *
-import ctypes
 
 
 if len(sys.argv) < 2:
-    print("Usage: python /path/plotsinglemodel.py /path/output.root")
+    print("Usage: python /path/plotsinglemodel.py /path/analysis_output.root /path/destination/")
     print("Optional arguments: histogram_number(integer) groomed_plots(boolean) scale_au(boolean) var_legend(boolean)")
     sys.exit(1)
     
 infile = sys.argv[1]
-if len(sys.argv) > 2:
-    histnumber = int(sys.argv[2])
+destination = sys.argv[2]
+if len(sys.argv) > 3:
+    histnumber = int(sys.argv[3])
 else:
     histnumber = -1
 
+# Check whether the specified path exists or not, create it if it does not exist
+isExist = os.path.exists(destination)
+if not isExist:
+    os.makedirs(destination)
 
-def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_au = True, var_legend = True):
+
+def MakeSinglePlot(infile = '', destination = './', histnumber = int, groomed_plots = False, scale_au = True, var_legend = True):
     rootfile1 = infile
     histoname = GetAllHistoNames(infile)[0][histnumber]
     histotitle = GetAllHistoNames(infile)[1][histnumber]
-    plot_title = "Plots/%s" %(histoname)
+    plot_title = "%s%s" %(destination,histoname)
     legend_positions = ['r','r','r','r','r','r','l','c','r','r','r','r','r','r','r','r','r','r']
 
     ROOT.gROOT.SetBatch(True)
     c=ROOT.TCanvas("c","c",800,600)
     f0 = ROOT.TFile(rootfile1,"READ")
-    #f0.ls()
     
     # Get the histogram
     h0=f0.Get(histoname)
     n_bins = h0.GetNbinsX()
     divider = 20 #larger divider gives more bins
-    #print('Number of bins %d'%(n_bins))
     while n_bins%divider != 0 or divider%2 != 0:
-        #print('divider=%d and n_bins//divider=%d and divider//2=%d'%(divider, n_bins%divider, divider%2))
         divider += 1
     if divider == n_bins:
         divider = divider/2
@@ -101,7 +100,7 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     if var_legend == True:
         legendp = GetLegendPlacement(legend_positions[histnumber])
     else: 
-        legendp = GetLegendPlacement('l')
+        legendp = GetLegendPlacement('r')
     a,b = legendp
     latex.SetTextSize(0.04)
     legend = ROOT.TLegend (a,0.64 ,b,0.74)
@@ -109,6 +108,8 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     latex.SetTextSize(0.03)
     latex.DrawLatex(a+0.01, 0.8 , "#bf{pp events at #sqrt{s}=13 TeV}")
     latex.DrawLatex(a+0.01, 0.76 , "#bf{m_{Z'}=800 GeV, N_{c}=2, N_{f}=2}")
+    latex.DrawLatex(a+0.01, 0.6 , "#bf{There are %i events}"%(h0.GetEntries()))
+    latex.DrawLatex(a+0.01, 0.56 , "#bf{mean = %0.2f std = %0.2f}"%(h0.GetMean(),h0.GetStdDev()))
     legend.AddEntry (histoname, histotitle)
     legend.SetLineWidth (0)
     legend.Draw("same")
@@ -131,11 +132,11 @@ def MakeSinglePlot(infile = '', histnumber = int, groomed_plots = False, scale_a
     
 
 if histnumber >= 0 and histnumber <= 29:
-    MakeSinglePlot(infile, histnumber, groomed_plots = False, scale_au = True, var_legend = True)
+    MakeSinglePlot(infile, destination, histnumber, groomed_plots = False, scale_au = True, var_legend = True)
 else:
     for hist in range(0,30):
         #if hist == 23:
         #    continue
         #else:
         #print(hist)
-        MakeSinglePlot(infile, histnumber = hist, groomed_plots = False, scale_au = True, var_legend = False)
+        MakeSinglePlot(infile, destination, histnumber = hist, groomed_plots = False, scale_au = True, var_legend = False)

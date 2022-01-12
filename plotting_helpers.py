@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[13]:
-
-
 import numpy as np
 import ROOT
 
@@ -32,8 +29,8 @@ def GetLegendPlacement(position = ''):
 
 def GetStatistics(histogram,histotitle):
     h0 = histogram
-    p = np.array([0.25,0.5,0.75])
     q = np.array([0.0,0.0,0.0])
+    p = np.array([0.25,0.5,0.75])
     h0.GetQuantiles(3,q,p)
     x_unit = h0.GetXaxis().GetTitle()
     if x_unit.find("trk") != -1:
@@ -46,7 +43,7 @@ def GetStatistics(histogram,histotitle):
     There are %i events in the histogram. They are binned into %i bins. 
     The mean is %0.2f %s and the standard deviation is %0.2f %s. 
     Half of the events are contained between %0.2f and %0.2f %s.
-    """%(histotitle,h0.GetEntries(), h0.GetNbinsX(),h0.GetMean(),x_unit,h0.GetStdDev(),x_unit,q[1],q[2],x_unit)
+    """%(histotitle,h0.GetEntries(), h0.GetNbinsX(),h0.GetMean(),x_unit,h0.GetStdDev(),x_unit,q[0],q[2],x_unit)
     return stat_string
 
 
