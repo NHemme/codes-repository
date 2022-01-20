@@ -35,7 +35,6 @@ import ROOT
 from array import array
 from helpers import *
 
-
 try:
   input = raw_input
 except:
@@ -91,8 +90,8 @@ R_jet = str(int(R*10))
 if R<1.0: R_jet = '0' + R_jet
 
 invpid  = [12, 14, 16, -12, -14, -16, 6000111,-6000111] #Neutrinoes (& anti) and??
-piPID = [4900111, 4900211]
-rhoPID = [4900113, 4900213]
+piPID = [4900111, 4900211, -490111, - 4900211]
+rhoPID = [4900113, 4900213, -4900113, -4900213]
 
 
 
@@ -127,7 +126,7 @@ histGenmT = ROOT.TH1F("gen_jet_met_mt" , "Gen transverse mass of jet + MET" , Nb
 histGenJetdphi = ROOT.TH1F("gen_jet_dphi", "dphi between Gen jets with R=%.1f"%(R), Nbins, 0.0, 6.0)
 
 Nbins = 50
-histGenrinv = ROOT.TH1F("gen_rinv", "Gen invisible ratio", Nbins, 0.0, 1.0)
+histGenrinv = ROOT.TH1F("gen_rinv", "Gen invisible ratio", Nbins, 0.0, 1.01)
 histGenratT = ROOT.TH1F("gen_jet_met_rt" , "Gen transverse ratio of jet + MET" , Nbins, 0.0 , 1.0)
 
 #Nbins = 40
@@ -137,6 +136,10 @@ histGenratT = ROOT.TH1F("gen_jet_met_rt" , "Gen transverse ratio of jet + MET" ,
 Nbins = 50
 histGenPions = ROOT.TH1F("gen_pions", "Gen number of pions", Nbins, 0.0, 50)
 histGenRhos = ROOT.TH1F("gen_rhos", "Gen number of rhos", Nbins, 0.0, 50)
+histGenPionDiff = ROOT.TH1F("gen_pion_diff", "Gen dark rho sign diff", 120, -30, 30)
+histGenRhoDiff = ROOT.TH1F("gen_rho_diff", "Gen dark pion sign diff", 120, -30, 30)
+histGenPionPID = ROOT.TH1F("gen_pion_pid", "Gen dark PID", 300, -300, 300)
+histGenRhoPID = ROOT.TH1F("gen_rho_pid", "Gen dark PID", 300, -300, 300)
 
 histGendphi1 = ROOT.TH1F("gen_dPhi1", "Gen dPhi_jet1_met", Nbins, -4.0, 4.0)
 histGendphi2 = ROOT.TH1F("gen_dPhi2", "Gen dPhi_jet2_met", Nbins, -4.0, 4.0)
@@ -196,43 +199,128 @@ hist3JetmJJ = ROOT.TH1F("jet_mJJ_trimmed", "Trimmed invariant mass m_{JJ} with R
 for entry in range(0, numberOfEntries):
     # Load selected branches with data from specified event
     treeReader.ReadEntry(entry)
-    totpx, totpy = 0, 0
-    npi, nrho = 0, 0 
+    
+    ###########################################
+    # Count dark particles and calculate r_inv
+    ###########################################
     allmesons, stablemesons = 0,0
+    npi, nrho = 0, 0 
     npi_unstable, nrho_unstable = 0,0
+    rho_plus, rho_minus, rho_diff = 0, 0, 0
+    pion_plus, pion_minus, pion_diff = 0, 0, 0 
+    list_of_fs_darks = []
+    boson_trigger = False
+    m_trigger = False
+    
+    # Check for Z-prime boson in event
     for iptcl in range(branchPtcl.GetEntries()):
-        if abs(branchPtcl.At(iptcl).PID) not in piPID+rhoPID:
-            continue
+        if branchPtcl.At(iptcl).PID == 4900023:
+            boson_trigger = True
+            daut1 = branchPtcl.At(iptcl).D1
+            daut2 = branchPtcl.At(iptcl).D2
+            # If it decays to a pair dark quarks the invariant mass of these will be calculated 
+            if branchPtcl.At(daut1).PID in [4900101,-4900101] and branchPtcl.At(daut2).PID in [4900101,-4900101]:
+                e1, px1, py1, pz1 = branchPtcl.At(daut1).E, branchPtcl.At(daut1).Px, branchPtcl.At(daut1).Py, branchPtcl.At(daut1).Pz
+                e2, px2, py2, pz2 = branchPtcl.At(daut2).E, branchPtcl.At(daut2).Px, branchPtcl.At(daut2).Py, branchPtcl.At(daut2).Pz
+                #m = np.sqrt((e1+e2)**2+2*e1*e2 - (px1**2 + py1**2 + pz1**2 + px2**2 + py2**2 + pz2**2 + 2*px1*px2 + 2*py1*py2 + 2*pz1*pz2))
+                m = np.sqrt(e1**2+e2**2+2*e1*e2 - ((px1+px2)**2 + (py1+py2)**2 + (pz1+pz2)**2))
+                
+    # Trigger the m_trigger in this event only if the boson_trigger was triggered and m is within 10% of 800 GeV
+    if boson_trigger == True and m > 790 and m < 810:
+        m_trigger = True
+    
+    # Loop through every particle in event
+    for iptcl in range(branchPtcl.GetEntries()):
+                    
+        # Skip the rest if particle is not dark
+        if branchPtcl.At(iptcl).PID not in piPID+rhoPID:
+            continue 
         if branchPtcl.At(iptcl).Status not in [1,83,84]:
             print('Unexpected status of dark particle. Status is %d.'%(branchPtcl.At(iptcl).Status))
+            
+        # Counting all dark mesons
         allmesons = allmesons + 1
+        
+        # Counting unstable dark mesons
         if branchPtcl.At(iptcl).Status in [83,84]:
             if branchPtcl.At(iptcl).PID in piPID:
-                #print('Unstable pion')
                 npi_unstable = npi_unstable + 1
-            if branchPtcl.At(iptcl).PID in rhoPID:
-                #print('Unstable rho')
-                #print(branchPtcl.At(iptcl).PID)
+            elif branchPtcl.At(iptcl).PID in rhoPID:
                 nrho_unstable = nrho_unstable + 1
-        #if branchPtcl.At(iptcl).Status in [83,84]:
-        #    daut = branchPtcl.At(iptcl).D1
-        #    print(branchPtcl.At(daut).Status)
-        if branchPtcl.At(iptcl).Status == 1:
+                
+        # Counting stable dark mesons
+        elif branchPtcl.At(iptcl).Status == 1:
             stablemesons = stablemesons + 1
-            if abs(branchPtcl.At(iptcl).PID) in piPID: npi = npi + 1
-            if abs(branchPtcl.At(iptcl).PID) in rhoPID: nrho = nrho + 1
-        #totpx = branchPtcl.At(iptcl).Px + totpx
-        #totpy = branchPtcl.At(iptcl).Py + totpy     
-    if entry%1000 == 0:
-        print('Number of unstable pions: %i. Number of unstable rhos: %i'%(npi_unstable,nrho_unstable))
-    #    print(allmesons, stablemesons, stablemesons/allmesons)
+            list_of_fs_darks.append(branchPtcl.At(iptcl).PID)
+            
+            # Checking for dark pions (final-state) DELETE
+            #if branchPtcl.At(iptcl).PID in piPID: 
+                #npi = npi + 1
+                #if np.sign(branchPtcl.At(iptcl).PID) == 1:
+                    #pi_plus = pi_plus+1
+                    #histGenPionPID.Fill(branchPtcl.At(iptcl).PID-4900000)
+                #elif np.sign(branchPtcl.At(iptcl).PID) == -1:
+                    #pi_minus = pi_minus+1
+                    #histGenPionPID.Fill(branchPtcl.At(iptcl).PID+4900000)
+                    
+            # Checking for dark rhos (final-state) DELETE      
+            #elif branchPtcl.At(iptcl).PID in rhoPID: 
+                #nrho = nrho + 1
+                #if np.sign(branchPtcl.At(iptcl).PID) == 1:
+                    #rho_plus = rho_plus+1
+                    #histGenRhoPID.Fill(branchPtcl.At(iptcl).PID-4900000)
+                #elif np.sign(branchPtcl.At(iptcl).PID) == -1:
+                    #rho_minus = rho_minus+1
+                    #histGenRhoPID.Fill(branchPtcl.At(iptcl).PID+4900000)
+    
+    # Calculate and store r_inv only if there are any dark mesons in the event
     if allmesons != 0:
         rinv = stablemesons/allmesons
         histGenrinv.Fill(rinv)
+        
+    # Count specific mesons only if m is within 10% of 800 GeV 
+    for i in range(len(list_of_fs_darks)):
+        pid = list_of_fs_darks[i]
+        # Diagonal pions
+        if pid == 4900111 and m_trigger == True:
+            histGenPionPID.Fill(111)
+        elif pid == -4900111 and m_trigger == True:
+            histGenPionPID.Fill(-111)
+        # Off-diagonal pions
+        elif pid == 4900211 and m_trigger == True:
+            histGenPionPID.Fill(211)
+            pion_plus = pion_plus+1
+        elif pid == -4900211 and m_trigger == True:
+            histGenPionPID.Fill(-211)  
+            pion_minus = pion_minus+1
+        # Diagonal rhos
+        elif pid == 4900113 and m_trigger == True:
+            histGenPionPID.Fill(113)
+        elif pid == -4900113 and m_trigger == True:
+            histGenPionPID.Fill(-113)
+        # Off-diagonal rhos
+        elif pid == 4900213 and m_trigger == True:
+            histGenPionPID.Fill(213)
+            rho_plus = rho_plus+1
+        elif pid == -4900213 and m_trigger == True:
+            histGenPionPID.Fill(-213)  
+            rho_minus = rho_minus+1
+        
+    # Calculate rho_diff only if m_trigger was triggered in event
+    if m_trigger == True:
+        pion_diff = pion_plus - pion_minus
+        histGenPionDiff.Fill(pion_diff)
+        rho_diff = rho_plus - rho_minus
+        histGenRhoDiff.Fill(rho_diff)
+
+        
+    # Print some numbers at every 1000 events - comment out if not needed
+    if entry%1000 == 0:
+        print('Number of unstable pions: %i. Number of unstable rhos: %i. Number of dark mesons %i. Stable mesons = %i. r_inv = %0.4f'%(npi_unstable,nrho_unstable,allmesons,stablemesons,rinv))
     
-    #histGenMET.Fill(np.sqrt(totpx**2 + totpy**2))
     histGenPions.Fill(npi)
     histGenRhos.Fill(nrho)
+        
         
     #######################
     # Generator level plots
@@ -247,7 +335,7 @@ for entry in range(0, numberOfEntries):
             genjet2vec = ROOT.TLorentzVector()
             genjet1vec = GetJetVector(genjet1.PT , genjet1.Eta , genjet1.Phi , genjet1.Mass)
             genjet2vec = GetJetVector(genjet2.PT , genjet2.Eta , genjet2.Phi , genjet2.Mass)
-            genmet = branchMET.At(0)
+            genmet = branchGenMET.At(0)
             genm = genmet.MET
             genMETPhi = genmet.Phi
             genMETx = genm* np.cos(genMETPhi)
@@ -428,6 +516,10 @@ histlist.Add(histGenMET)
 histlist.Add(histGenPions)
 histlist.Add(histGenRhos)
 histlist.Add(histGenrinv)
+histlist.Add(histGenPionDiff)
+histlist.Add(histGenRhoDiff)
+histlist.Add(histGenPionPID)
+histlist.Add(histGenRhoPID)
 histlist.Add(histGenJetmJJ)
 histlist.Add(histGenJetdphi)
 histlist.Add(histGendphi1)
@@ -451,7 +543,7 @@ histlist.Add(hist2JetmJJ)
 histlist.Add(hist3Jet1PT)
 histlist.Add(hist3Jet2PT)
 histlist.Add(hist3JetmJJ)
-#histlist.Add(histtrackpt)
+#histlist.Add(histtrackpt) # 2D histogram
 histlist.Add(histdelEta)
 
 
